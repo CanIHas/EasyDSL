@@ -1,0 +1,125 @@
+plugins {
+    id 'java'
+    id 'groovy'
+    id 'idea'
+    id 'maven'
+    id 'maven-publish'
+    id 'com.jfrog.bintray' version '1.0'
+    id 'com.jfrog.artifactory' version '3.0.1'
+}
+
+
+group = "can.i.has"
+version = '0.1-SNAPSHOT'
+targetCompatibility = 1.7
+sourceCompatibility = 1.7
+
+
+task wrapper(type: Wrapper) {
+    gradleVersion = '2.4'
+}
+
+repositories {
+    mavenCentral()
+    jcenter()
+    maven { url 'http://dl.bintray.com/filipmalczak/maven' }
+}
+
+dependencies {
+    // Common dependencies
+    compile localGroovy()
+    compile 'org.slf4j:slf4j-api:1.7.2'
+    compile 'org.reflections:reflections:0.9.10'
+
+
+    testCompile 'junit:junit:4.11'
+
+
+    runtime 'org.slf4j:slf4j-log4j12:1.7.2'
+
+}
+
+test {
+    useJUnit()
+}
+
+task javadocJar(type: Jar, dependsOn: groovydoc) {
+    from "${buildDir}/docs/groovydoc"
+    classifier = 'javadoc'
+}
+
+task sourcesJar(type: Jar) {
+    from sourceSets.main.allSource
+    classifier = 'sources'
+}
+
+//aritfacts {
+//    archives sourcesJar
+//    archives javadocJar
+//}
+
+def configClosure = {
+    publications {
+        main(MavenPublication) {
+            from components.java
+            artifact sourcesJar
+            artifact javadocJar
+            pom.withXml {
+                asNode().children().last() + {
+                    resolveStrategy = DELEGATE_FIRST
+                    name project.parent.name
+                    description project.description
+                    url "https://github.com/CanIHas/EasyDSL"
+                    scm {
+                        url "https://github.com/CanIHas/EasyDSL"
+                        connection "scm:git:https://github.com/CanIHas/EasyDSL"
+                    }
+                    licenses {
+                        license {
+                            name "The MIT License"
+                            distribution 'repo'
+                        }
+                    }
+                }
+            }
+        }
+    }
+}
+
+publishing(configClosure)
+artifactoryPublish(configClosure)
+
+bintray {
+    user = System.getenv('BINTRAY_USER') ?: project.properties.bintray_username
+    key  = System.getenv('BINTRAY_KEY')  ?: project.properties.bintray_api_key
+    publications = ['main']
+    pkg {
+        repo = 'maven'
+        name = project.name
+        version project.version
+    }
+}
+
+artifactory {
+    contextUrl = artifactory_contextUrl
+    publish {
+        repository {
+            repoKey = 'oss-snapshot-local'
+            username = artifactory_user
+            password = artifactory_password
+        }
+        defaults {
+            publications 'main'
+        }
+    }
+}
+
+task publishArtifacts(
+    type: Task,
+    dependsOn: (
+        ("${project.version}".endsWith("-SNAPSHOT")) ?
+            ':artifactoryPublish' :
+            ':bintrayUpload'
+        )
+    )
+
