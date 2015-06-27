@@ -5,6 +5,8 @@ import can.i.has.easy_dsl.api.field.Build
 import can.i.has.easy_dsl.api.field.Configure
 import can.i.has.easy_dsl.api.field.Getter
 import can.i.has.easy_dsl.api.field.InternalField
+import can.i.has.easy_dsl.api.field.MethodSetter
+import can.i.has.easy_dsl.api.field.WithMethod
 import can.i.has.easy_dsl.api.method.Delegate
 import can.i.has.easy_dsl.api.method.InternalMethod
 
@@ -26,6 +28,15 @@ class TopClass implements ConfigurableTrait{
 
     @Build
     ToBuild toBuild
+
+    @Access
+    Closure someClosure
+
+    @MethodSetter
+    Closure otherClosure
+
+    @MethodSetter
+    Map someMap
 
     @Delegate
     def foo(){

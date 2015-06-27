@@ -5,7 +5,7 @@ import can.i.has.easy_dsl.impl.DelegationUtils
 trait ConfigurableTrait {
 
 //    @Lazy Configurator configurator = new Configurator(this)
-    @Lazy Conf configurator = new Conf(this)
+    @Lazy Configurator configurator = new Configurator(this)
 
 
     void configure(Closure c){

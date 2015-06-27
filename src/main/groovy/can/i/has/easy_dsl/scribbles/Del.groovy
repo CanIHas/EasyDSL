@@ -1,8 +1,5 @@
 package can.i.has.easy_dsl.scribbles
 
-import can.i.has.easy_dsl.impl.ConfigurationSetupResolver
-
-
 class Del {
     def methodMissing(String name, args){
         println("method missing")

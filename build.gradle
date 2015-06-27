@@ -10,7 +10,7 @@ plugins {
 
 
 group = "can.i.has"
-version = '0.1-SNAPSHOT'
+version = '0.1.0'
 targetCompatibility = 1.7
 sourceCompatibility = 1.7
 

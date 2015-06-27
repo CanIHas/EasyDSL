@@ -1,27 +1,55 @@
 package can.i.has.easy_dsl
 
-import can.i.has.easy_dsl.impl.ConfigurationSetupResolver
+import can.i.has.easy_dsl.api.field.WithMethod
+import can.i.has.easy_dsl.impl.ConfigurationResolver
 
-import groovy.transform.Canonical
+import static can.i.has.easy_dsl.impl.ConfiguratorUtils.*
 
-@Canonical
 class Configurator {
-    Object traitThis;
+    private Object $traitThis;
+
+    static Closure defaultConstructor = { Class clazz ->
+        switch (clazz){
+            case Map: return [:]
+            case List: return []
+            case Set: return [].toSet()
+            default: clazz.newInstance()
+        }
+    }
+
+
+    Configurator(Object $traitThis) {
+        this.$traitThis = $traitThis
+    }
 
     def methodMissing(String name, args){
-        def closure = ConfigurationSetupResolver.instance.resolveMethod(traitThis.class, name)
-        assert closure //todo: exception
-        closure.call(traitThis, args)
+        WithMethod annotation = getFieldWithMethodAnnotation($traitThis, name)
+        if (annotation){
+            if (ConfigurationResolver.instance.propertyType($traitThis.class, name) == Closure) {
+                assert args.size() == 1 && args[0] instanceof Closure
+                $traitThis.metaClass.setProperty($traitThis, name, args[0])
+            } else {
+                def a = preprocessArgs(args)
+                doWithMethod($traitThis, annotation, name, a[0], a[1], a[2])
+            }
+        } else if (isDelegatedMethod($traitThis, name)){
+            $traitThis.metaClass.invokeMethod($traitThis, name, args)
+        } else {
+            throw new MissingMethodException(name, $traitThis.class, args)
+        }
     }
 
     def propertyMissing(String name){
-        def closure = ConfigurationSetupResolver.instance.resolveGetter(traitThis.class, name)
-        assert closure //todo: exception
-        closure.call(traitThis)
+        if (isFieldWithGetter($traitThis, name)){
+            return $traitThis.metaClass.getProperty($traitThis, name)
+        }
+        throw new MissingPropertyException(name, $traitThis.class)
     }
     def propertyMissing(String name, val){
-        def closure = ConfigurationSetupResolver.instance.resolveSetter(traitThis.class, name)
-        assert closure //todo: exception
-        closure.call(traitThis, val)
+        if (isFieldWithSetter($traitThis, name)){
+            return $traitThis.metaClass.setProperty($traitThis, name, val)
+        }
+        throw new MissingPropertyException(name, $traitThis.class)
     }
+
 }
