@@ -1,6 +1,8 @@
 package can.i.has.easy_dsl
 
 import can.i.has.easy_dsl.api.field.Access
+import can.i.has.easy_dsl.api.field.Build
+import can.i.has.easy_dsl.api.field.Configure
 import can.i.has.easy_dsl.api.field.Getter
 import can.i.has.easy_dsl.api.field.InternalField
 import can.i.has.easy_dsl.api.method.Delegate
@@ -19,9 +21,15 @@ class TopClass implements ConfigurableTrait{
     @InternalField
     String ignored
 
+    @Configure
+    ToConfigure toConfigure
+
+    @Build
+    ToBuild toBuild
+
     @Delegate
     def foo(){
-        println "I am $this"
+        return this
     }
 
     @InternalMethod

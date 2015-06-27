@@ -1,5 +1,6 @@
 package can.i.has.easy_dsl.impl
 
+import can.i.has.easy_dsl.ConfigurableTrait
 import can.i.has.easy_dsl.api.field.Access
 import can.i.has.easy_dsl.api.field.Build
 import can.i.has.easy_dsl.api.field.Configure
@@ -116,15 +117,22 @@ class ConfigurationSetupResolver {
                 }
         }
         def result = found ? found[0] : null
-        if (result && !result instanceof WithMethod)
+        if (result && !(result instanceof WithMethod))
             return new WithMethod(){
                 @Override
                 FieldConfigurationStrategy value() {
-                    [
-                        (MethodSetter): FieldConfigurationStrategy.NONE,
-                        (Configure):    FieldConfigurationStrategy.CONFIGURE,
-                        (Build):        FieldConfigurationStrategy.BUILD
-                    ]
+                    if (result instanceof MethodSetter)
+                        return FieldConfigurationStrategy.NONE
+                    else if (result instanceof Configure)
+                        return FieldConfigurationStrategy.CONFIGURE
+                    else if (result instanceof Build)
+                        return FieldConfigurationStrategy.BUILD
+                    assert false //todo: should not happen!
+//                    [
+//                        (MethodSetter): FieldConfigurationStrategy.NONE,
+//                        (Configure):    FieldConfigurationStrategy.CONFIGURE,
+//                        (Build):        FieldConfigurationStrategy.BUILD
+//                    ][result.class]
                 }
 
                 @Override
@@ -182,25 +190,95 @@ class ConfigurationSetupResolver {
         return f ? { that, val -> that.metaClass.setProperty(that, name, val) } : null
     }
 
-    Closure resolveMethod(Class clazz, String name, Object[] args){
+    def preprocessArgs(Object... args){
+        assert args && args.size()<4
+        if (args.size()==1){
+            assert args[0] instanceof Closure
+            return [[:], null, args[0]]
+        } else if (args.size()==2){
+            assert args[1] instanceof Closure
+            if (args[0] instanceof Map)
+                return [args[0], null, args[1]]
+            else
+                return [[:], args[0], args[1]]
+        } else {
+            assert args[0] instanceof Map
+            assert args[2] instanceof Closure
+            return [args[0], args[1], args[2]]
+        }
+    }
+
+    Class propertyType(Class objClass, String propName){
+        objClass.declaredFields.find { it.name == propName }?.type ?:
+            objClass.declaredMethods.find { it.name == "set${propName.capitalize()}" }?.returnType
+    }
+
+    Closure resolveMethod(Class clazz, String name){
         //todo: just implement this
-//        def f = clazz.declaredFields.find {
-//            it.name == name &&
-//                getWithMethod(it) || // explicit field annotation
-//                ( //class annotation
-//                    !fieldAnnotations.any { a -> it.isAnnotationPresent(a) } &&
-//                        getWithMethod(clazz)
-//                )
-//        }
-//        if (f) {
-//            def ann = getWithMethod(f) ?: getWithMethod(clazz)
-//            return { Map kwargs=[:], Object val, Closure closure ->
-//
-//            }
-//        } else {
-//            //method delegation
-//        }
+        def f = clazz.declaredFields.find {
+            it.name == name &&
+                getWithMethod(it) || // explicit field annotation
+                ( //class annotation
+                    !fieldAnnotations.any { a -> it.isAnnotationPresent(a) } &&
+                        getWithMethod(clazz)
+                )
+        }
+        if (f) {
+            WithMethod ann = getWithMethod(f) ?: getWithMethod(clazz)
+            return { that, Object... args ->
+                def preprocessed = doArgs(args)
+                def kwargs = preprocessed.kwargs
+                def val = preprocessed.val
+                def closure = preprocessed.closure
+                if (ann.withSetter()) {
+                    if (!ann.allowOverwrite() && that.metaClass.getProperty(that, name))
+                        assert !val
+                    if (val)
+                        that.metaClass.setProperty(that, name, val)
+                    else if (!that.metaClass.getProperty(that, name)) {
+//                            (ann.constructor() as Class).constructors.each {
+//                                println it.parameterTypes
+//                            }
+//                        assert Closure.isAssignableFrom(ann.constructor() as Class)
+                        def thisObj = [:]
+                        Closure constr = ann.constructor().newInstance(this, thisObj)
+                        that.metaClass.setProperty(
+                            that,
+                            name,
+                            constr.call(
+                                propertyType(that.class, name)
+                            )
+                        )
+                    }
+                }
+                def newVal = that.metaClass.getProperty(that, name)
+
+                if (!ann.withMapping())
+                    assert !kwargs
+                if (kwargs)
+                    kwargs.each { k, v ->
+                        newVal.metaClass.setProperty(newVal, k, v)
+                    }
+
+                switch (ann.value()) {
+                    case FieldConfigurationStrategy.NONE: return;
+                    case FieldConfigurationStrategy.BUILD:
+//                        DelegationUtils.callWithDelegate(newVal, closure);
+                        newVal.with closure
+                        return;
+                    case FieldConfigurationStrategy.CONFIGURE:
+                        assert newVal instanceof ConfigurableTrait
+//                        DelegationUtils.callWithDelegate(newVal.configurator, closure);
+                        newVal.configure closure
+                        return;
+                }
+
+            }
+        } else {
+            //todo: method delegation
+        }
 
     }
 
 }
+

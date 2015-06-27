@@ -1,14 +1,14 @@
 package can.i.has.easy_dsl
 
+import can.i.has.easy_dsl.impl.DelegationUtils
+
 trait ConfigurableTrait {
 
-    @Lazy Configurator configurator = new Configurator(this)
+//    @Lazy Configurator configurator = new Configurator(this)
+    @Lazy Conf configurator = new Conf(this)
 
 
     void configure(Closure c){
-        def toCall = c.clone()
-        c.delegate = this.configurator
-        c.resolveStrategy = Closure.DELEGATE_FIRST
-        c.call()
+        DelegationUtils.callWithDelegate(configurator, c)
     }
 }

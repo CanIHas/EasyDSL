@@ -1,7 +1,5 @@
 package can.i.has.easy_dsl.api.field
 
-import can.i.has.easy_dsl.impl.old.ConfigurationUtils
-
 import java.lang.annotation.ElementType
 import java.lang.annotation.Retention
 import java.lang.annotation.RetentionPolicy
