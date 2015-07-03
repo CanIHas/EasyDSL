@@ -15,4 +15,16 @@ class MOPUtils {
         else
             obj."$name"
     }
+
+    static def hasProperty(obj, String name){
+        if (obj.metaClass)
+            return obj.metaClass.hasProperty(name)
+        else
+            try {
+                obj."$name"
+                return true
+            } catch (MissingPropertyException mpe){
+                return false
+            }
+    }
 }

@@ -1,8 +1,12 @@
 package can.i.has.easy_dsl.impl
 
 import can.i.has.easy_dsl.ConfigurableTrait
+import can.i.has.easy_dsl.Utils
+import can.i.has.easy_dsl.api.modifiers.Collect
 import can.i.has.easy_dsl.api.field.FieldConfigurationStrategy
 import can.i.has.easy_dsl.api.field.WithMethod
+
+import java.lang.reflect.AnnotatedElement
 
 
 class ConfiguratorUtils {
@@ -12,7 +16,6 @@ class ConfiguratorUtils {
         def f = traitThis.class.declaredFields.find {
             it.name == name
         }
-//        return f ? resolver.getGetter(f)!=null : resolver.getGetter(traitThis.class) !=null
         return (f!=null && resolver.getGetter(f)!=null) || resolver.getGetter(traitThis.class) !=null
     }
 
@@ -40,51 +43,48 @@ class ConfiguratorUtils {
         }
         def out = resolver.getDelegate(traitThis.class)
         return out != null
-//        return m ? resolver.getDelegate(m)!=null : resolver.getDelegate(traitThis.class)!=null
     }
 
-    static void doWithMethod(Object traitThis, WithMethod ann, String name, Map kwargs, Object val, Closure closure){
+    static def doWithMethod(Object traitThis, WithMethod ann, String collectTarget, String name, Map kwargs, Object val, Closure closure){
+        def resultVal = MOPUtils.hasProperty(name) ? MOPUtils.getProperty(traitThis, name): null
+
         if (ann.withSetter()) {
-            if (!ann.allowOverwrite() && MOPUtils.getProperty(traitThis, name))
+            if (!ann.allowOverwrite() && resultVal)
                 assert !val
-            if (val)
-                MOPUtils.setProperty(traitThis, name, val)
-            else if (!MOPUtils.getProperty(traitThis, name)) {
-//                            (ann.constructor() as Class).constructors.each {
-//                                println it.parameterTypes
-//                            }
-//                        assert Closure.isAssignableFrom(ann.constructor() as Class)
+            else if (!resultVal && !val) {
                 def thisObj = [:]
                 Closure constr = ann.constructor().newInstance(this, thisObj)
-                traitThis.metaClass.setProperty(
-                    traitThis,
-                    name,
-                    constr.call(
-                        resolver.propertyType(traitThis.class, name)
+                resultVal = constr.call(
+                        resolver.propertyType(traitThis.class, collectTarget ?: name)
                     )
-                )
-            }
+            } else  if (val)
+                resultVal = val
         }
-        def newVal = MOPUtils.getProperty(traitThis, name)
 
         if (!ann.withMapping())
             assert !kwargs
         if (kwargs)
             kwargs.each { k, v ->
-                MOPUtils.setProperty(newVal, k, v)
+                MOPUtils.setProperty(resultVal, k, v)
             }
 
         switch (ann.value()) {
-            case FieldConfigurationStrategy.NONE: return;
+            case FieldConfigurationStrategy.NONE: break
             case FieldConfigurationStrategy.BUILD:
-//                        DelegationUtils.callWithDelegate(newVal, closure);
-                newVal.with closure
-                return;
+                resultVal.with closure
+                break
             case FieldConfigurationStrategy.CONFIGURE:
-                assert newVal instanceof ConfigurableTrait
-//                        DelegationUtils.callWithDelegate(newVal.configurator, closure);
-                newVal.configure closure
-                return;
+                assert resultVal instanceof ConfigurableTrait
+                Utils.configure(resultVal, closure)
+                break
+        }
+        if (collectTarget!=null) {
+            MOPUtils.getProperty(traitThis, collectTarget).add(resultVal)
+            return
+        }
+        else {
+            MOPUtils.setProperty(traitThis, name, resultVal)
+            return resultVal
         }
     }
 
@@ -107,5 +107,11 @@ class ConfiguratorUtils {
             assert args[2] instanceof Closure
             return [args[0], args[1], args[2]]
         }
+    }
+
+    static Collect getCollect(AnnotatedElement ae){
+        def out = ae.annotations.findAll { it instanceof Collect }
+        assert out.size()<2
+        out ? out[0] : null
     }
 }

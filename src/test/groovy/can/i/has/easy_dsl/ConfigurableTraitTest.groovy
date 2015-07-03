@@ -39,6 +39,9 @@ class ConfigurableTraitTest extends GroovyTestCase {
             }
 
             someMap a: 1, b: 2
+
+            text "A"
+            text "B"
         }
         assert xCopy == 1
         assert instance.z == chosenList
@@ -49,6 +52,7 @@ class ConfigurableTraitTest extends GroovyTestCase {
         assert instance.otherClosure.call() == 10
         assert instance.someMap == [a: 1, b: 2]
         assert fooResult == instance
+        assert instance.someList == ["A", "B"]
     }
 
 }

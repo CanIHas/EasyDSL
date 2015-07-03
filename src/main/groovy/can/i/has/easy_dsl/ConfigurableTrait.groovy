@@ -1,14 +1,9 @@
 package can.i.has.easy_dsl
 
-import can.i.has.easy_dsl.impl.DelegationUtils
-
 trait ConfigurableTrait {
-
-//    @Lazy Configurator configurator = new Configurator(this)
-    @Lazy Configurator configurator = new Configurator(this)
-
+    @Lazy Configurator configurator = Utils.getConfigurator(this)
 
     void configure(Closure c){
-        DelegationUtils.callWithDelegate(configurator, c)
+        Utils.configure(this, c)
     }
 }

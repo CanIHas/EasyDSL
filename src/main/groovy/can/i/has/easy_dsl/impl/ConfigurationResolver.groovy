@@ -35,6 +35,18 @@ class ConfigurationResolver {
         Build //WithMethod(FieldConfigurationStrategy.BUILD)
     ]
 
+    List<Annotation> getMethodAnnotations(AnnotatedElement element){
+        ConfigurationNormalizer.normalize(element.annotations.findAll {
+            methodAnnotations.any { a -> a.isInstance(it) }
+        })
+    }
+
+    List<Annotation> getFieldAnnotations(AnnotatedElement element){
+        ConfigurationNormalizer.normalize(element.annotations.findAll {
+            fieldAnnotations.any { a -> a.isInstance(it) }
+        })
+    }
+
     Annotation getInternalMethod(AnnotatedElement element){
         assert element.annotations.every {
             it instanceof InternalMethod ||
@@ -71,19 +83,16 @@ class ConfigurationResolver {
                 (it instanceof Access && it.getter())
         }
         assert found.size() < 2
-        assert element.annotations.every {
-            found.contains(it) ||
-                [WithMethod, MethodSetter, Configure, Build].any { a ->
-                    a.isInstance(it)
-                } ||
-                !fieldAnnotations.any { a ->
-                    a.isInstance(it)
-                }
-        }
-        def result = found ? found[0] : null
-        return result instanceof Access ?
-            new Getter() { @Override Class<? extends Annotation> annotationType() { Getter } } :
-                result
+//        assert element.annotations.every {
+//            found.contains(it) ||
+//                [WithMethod, MethodSetter, Configure, Build].any { a ->
+//                    a.isInstance(it)
+//                } ||
+//                !fieldAnnotations.any { a ->
+//                    a.isInstance(it)
+//                }
+//        }
+        return found ? ConfigurationNormalizer.normalizeGetter(found[0]) : null
     }
 
     Annotation getSetter(AnnotatedElement element){
@@ -92,19 +101,16 @@ class ConfigurationResolver {
                 (it instanceof Access && it.setter())
         }
         assert found.size() < 2
-        assert element.annotations.every {
-            found.contains(it) ||
-                [WithMethod, MethodSetter, Configure, Build].any { a ->
-                    a.isInstance(it)
-                } ||
-                !fieldAnnotations.any { a ->
-                    a.isInstance(it)
-                }
-        }
-        def result = found ? found[0] : null
-        return result instanceof Access ?
-            new Setter() { @Override Class<? extends Annotation> annotationType() { Setter } } :
-            result
+//        assert element.annotations.every {
+//            found.contains(it) ||
+//                [WithMethod, MethodSetter, Configure, Build].any { a ->
+//                    a.isInstance(it)
+//                } ||
+//                !fieldAnnotations.any { a ->
+//                    a.isInstance(it)
+//                }
+//        }
+        return found ? ConfigurationNormalizer.normalizeSetter(found[0]) : null
     }
 
     Annotation getWithMethod(AnnotatedElement element){
@@ -123,47 +129,8 @@ class ConfigurationResolver {
                     a.isInstance(it)
                 }
         }
-        def result = found ? found[0] : null
-        if (result && !(result instanceof WithMethod && result.constructor()!=null))
-            return new WithMethod(){
-                @Override
-                FieldConfigurationStrategy value() {
-                    if (result instanceof MethodSetter)
-                        return FieldConfigurationStrategy.NONE
-                    else if (result instanceof Configure)
-                        return FieldConfigurationStrategy.CONFIGURE
-                    else if (result instanceof Build)
-                        return FieldConfigurationStrategy.BUILD
-                    result.value()
-                }
-
-                @Override
-                boolean withSetter() {
-                    result instanceof MethodSetter || result.withSetter()
-                }
-
-                @Override
-                boolean allowOverwrite() {
-                    result.allowOverwrite()
-                }
-
-                @Override
-                boolean withMapping() {
-                    result.withMapping()
-                }
-
-                @Override
-                Class constructor() {
-                    result.constructor()
-                }
-
-                @Override
-                Class<? extends Annotation> annotationType() {
-                    WithMethod
-                }
-            }
-        return result
-    }
+        return found ? ConfigurationNormalizer.normalizeWithMethod(found[0]) : null
+        }
 
     Class propertyType(Class objClass, String propName){
         objClass.declaredFields.find { it.name == propName }?.type ?:
