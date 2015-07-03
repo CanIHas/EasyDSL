@@ -12,7 +12,7 @@ plugins {
 
 
 group = "can.i.has"
-version = '0.1.1-SNAPSHOT'
+version = '0.2-SNAPSHOT'
 targetCompatibility = 1.7
 sourceCompatibility = 1.7
 
