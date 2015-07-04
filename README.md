@@ -93,7 +93,10 @@ It means that instead of standard case (like with @Configure above) it should ge
 (a "scope"), taking closure which is executed to create and collect list elements.
 It should only be used on List fields. 
 
-* todo: this may change in the future
+> I'm thinking about extending this annotation so that it may call custom method with single parameter.
+> At this moment that method is add(), though the type isn't checked at any time, so actually
+> you can use this annotation on field of any type that has add(Object arg) method or such, but with
+> explicit argument class instead of Object.
 
 Its parameters specify what will be the name and return type of `@Configure`-generated method used to create list elements.
 
@@ -153,7 +156,28 @@ It's metaclass is expando-enhanced with methods, basing on field and method anno
 Those methods keep track of first given object and access its fields and delegate to its methods.
 Closure is called with that `Configurator` as delegate, and then configured object (first argument) is returned.
 
-* todo: mention trait
+There is also a [trait](src/main/groovy/can/i/has/easy_dsl/ConfigurableTrait.groovy) that provides
+lazily initiated field `Configurator configurator` assigned to `this` object.
+Besides, it provides a method `configure(Closure closure)` that calls `Utils.configure` with `this` object
+and closure passed as argument and returns its result. That means that parser above can be written as:
+ 
+    class AddressBookParser implements ConfigurableTrait{
+        @Configure
+        AddressBook addressBook
+        
+        static AddressBook parse(Closure closure){
+            return new AddressBookParser().configure(closure).addressBook
+        }
+    } 
+
+which is a nice alternative to using `Utils` as a category (since both its methods are static).
+
+> For those who wonder: 
+> `Utils.getConfigurator` looks for objects `configurator` property and if there isn't one or it is `null`, then it 
+> creates and stores it. 
+> That method is used internally to recursively configure the whole object hierarchy, so you can provide you custom
+> `configurator` field to add your own hand-crafted extensions of generated DSL. 
+
 
 ### Test it
 

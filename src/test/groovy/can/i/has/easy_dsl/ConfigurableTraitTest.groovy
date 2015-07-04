@@ -48,7 +48,6 @@ class ConfigurableTraitTest extends GroovyTestCase {
         assert instance.toBuild == new ToBuild(1, 2)
         assert instance.toConfigure == new ToConfigure("a1", 1, new ToConfigure("a2", 2, null))
         assert instance.someClosure.call() == 5
-        println instance.otherClosure.delegate.class
         assert instance.otherClosure.call() == 10
         assert instance.someMap == [a: 1, b: 2]
         assert fooResult == instance
