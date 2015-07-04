@@ -211,15 +211,7 @@ class MetaClassProvider {
                     getWithMethodObtainer(field.name, withMethod, obtainedType)
             )
             if (collectScope != null) {
-                metaClass."${scopeName}" << { Closure c ->
-                    try {
-                        ((Configurator)delegate).scopeStack.push(scopeName)
-                        DelegationUtils.callWithDelegate(((Configurator)delegate), c)
-                        return ((Configurator)delegate).getTarget()
-                    } finally {
-                        ((Configurator)delegate).scopeStack.pop()
-                    }
-                }
+                metaClass."${scopeName}" << getScopeClosure(field, scopeName)
                 ScopeRegistry.getScopeMapping(clazz)[scopeName] = field.name
             }
 
@@ -229,6 +221,30 @@ class MetaClassProvider {
             metaClass."${obtainerName}" << newMethod
         }
 
+    }
+
+    static void setTarget(Configurator configurator, List list){
+        configurator.with {
+            assert scopeStack
+            def currentScope = scopeStack.last()
+            assert targetPerScope.containsKey(currentScope)
+            traitThis.metaClass.setProperty(traitThis, targetPerScope[currentScope], list)
+        }
+
+    }
+
+    Closure getScopeClosure(Field field, String scopeName){
+        return { Closure c ->
+            try {
+                ((Configurator)delegate).scopeStack.push(scopeName)
+                if (((Configurator)delegate).target == null)
+                    setTarget((Configurator)delegate, [])
+                DelegationUtils.callWithDelegate(((Configurator)delegate), c)
+                return ((Configurator)delegate).getTarget()
+            } finally {
+                ((Configurator)delegate).scopeStack.pop()
+            }
+        }
     }
 
     Closure getGetterClosure(String name){
@@ -277,7 +293,7 @@ class MetaClassProvider {
             Map kwargs = preprocessed[0]
             Object val = preprocessed[1]
             Closure closure = preprocessed[2]
-            def resultVal = MOPUtils.hasProperty(name) ? MOPUtils.getProperty(((Configurator)delegate).traitThis, name): null
+            def resultVal = MOPUtils.hasProperty(name) ? MOPUtils.getProperty(delegate.traitThis, name): null
 
             if (withMethod.withSetter()) {
                 if (!withMethod.allowOverwrite() && resultVal)
@@ -319,9 +335,12 @@ class MetaClassProvider {
             ScopeRegistry.getScopeMapping(clazz)[staticScope] = field.name
         return { Object... args ->
             try {
-                if (staticScope)
-                    ((Configurator)delegate).scopeStack.push(staticScope)
-                def result = obtainer.call(args)
+                if (staticScope) {
+                    ((Configurator) delegate).scopeStack.push(staticScope)
+                    if (((Configurator)delegate).target == null)
+                        setTarget((Configurator)delegate, [])
+                }
+                def result = DelegationUtils.callWithDelegate(delegate, args, obtainer)
                 ((Configurator)delegate).target.add(result)
                 return result
             } finally {
@@ -334,7 +353,7 @@ class MetaClassProvider {
 
     Closure getMethodSetter(Field field, Closure obtainer){
         return { Object... args ->
-            def result = obtainer.call(args)
+            def result = DelegationUtils.callWithDelegate(delegate, args, obtainer)
             ((Configurator)delegate).traitThis.metaClass.setProperty(((Configurator)delegate).traitThis, field.name, result)
             return result
         }
