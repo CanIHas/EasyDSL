@@ -1,6 +1,6 @@
 package can.i.has.easy_dsl.api.field
 
-import can.i.has.easy_dsl.impl.DefaultConstructor
+import can.i.has.easy_dsl.impl.utils.DefaultConstructor
 
 import java.lang.annotation.ElementType
 import java.lang.annotation.Retention

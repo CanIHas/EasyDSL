@@ -1,4 +1,4 @@
-package can.i.has.easy_dsl.meta
+package can.i.has.easy_dsl.impl
 
 
 class ScopeRegistry {

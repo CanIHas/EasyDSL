@@ -1,7 +1,7 @@
 package can.i.has.easy_dsl
 
-import can.i.has.easy_dsl.meta.MetaClassProvider
-import can.i.has.easy_dsl.meta.ScopeRegistry
+import can.i.has.easy_dsl.impl.MetaClassProvider
+import can.i.has.easy_dsl.impl.ScopeRegistry
 
 class Configurator {
     Object traitThis;

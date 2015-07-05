@@ -1,4 +1,4 @@
-package can.i.has.easy_dsl.impl
+package can.i.has.easy_dsl.impl.utils
 
 class DelegationUtils {
     static <T> T callWithDelegate(Object delegate, Object[] args=[].toArray(), Closure<T> closure){

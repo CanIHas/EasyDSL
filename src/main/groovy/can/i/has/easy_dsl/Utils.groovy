@@ -1,7 +1,7 @@
 package can.i.has.easy_dsl
 
-import can.i.has.easy_dsl.impl.DelegationUtils
-import can.i.has.easy_dsl.impl.MOPUtils
+import can.i.has.easy_dsl.impl.utils.DelegationUtils
+import can.i.has.easy_dsl.impl.utils.MOPUtils
 
 
 class Utils {

@@ -1,4 +1,4 @@
-package can.i.has.easy_dsl.meta
+package can.i.has.easy_dsl.impl
 
 import can.i.has.easy_dsl.Configurator
 import can.i.has.easy_dsl.Utils
@@ -9,9 +9,8 @@ import can.i.has.easy_dsl.api.method.InternalMethod
 import can.i.has.easy_dsl.api.modifiers.Collect
 import can.i.has.easy_dsl.api.modifiers.CollectScope
 import can.i.has.easy_dsl.api.modifiers.Inherited
-import can.i.has.easy_dsl.impl.ConfigurationResolver
-import can.i.has.easy_dsl.impl.DelegationUtils
-import can.i.has.easy_dsl.impl.MOPUtils
+import can.i.has.easy_dsl.impl.utils.DelegationUtils
+import can.i.has.easy_dsl.impl.utils.MOPUtils
 
 import groovy.transform.Memoized
 

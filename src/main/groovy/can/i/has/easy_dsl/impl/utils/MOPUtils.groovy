@@ -1,4 +1,4 @@
-package can.i.has.easy_dsl.impl
+package can.i.has.easy_dsl.impl.utils
 
 
 class MOPUtils {
