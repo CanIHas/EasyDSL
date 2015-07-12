@@ -9,5 +9,6 @@ import java.lang.annotation.Target
 @Target([ElementType.FIELD])
 @interface CollectScope {
     String elementName()
+
     Class type()
 }

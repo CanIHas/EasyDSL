@@ -11,6 +11,8 @@ import java.lang.annotation.Target
 @Target([ElementType.TYPE, ElementType.FIELD])
 @interface MethodSetter {
     boolean allowOverwrite() default true;
+
     boolean withMapping() default true;
+
     Class constructor() default DefaultConstructor
 }

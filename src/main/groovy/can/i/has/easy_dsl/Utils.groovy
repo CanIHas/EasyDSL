@@ -5,7 +5,7 @@ import can.i.has.easy_dsl.impl.utils.MOPUtils
 
 
 class Utils {
-    static Configurator getConfigurator(Object o){
+    static Configurator getConfigurator(Object o) {
         if (MOPUtils.hasProperty(o, "configurator")) {
             def val = MOPUtils.getProperty(o, "configurator")
             if (val == null) {
@@ -17,7 +17,7 @@ class Utils {
         return new Configurator(o)
     }
 
-    static <T> T configure(T obj, Closure closure){
+    static <T> T configure(T obj, Closure closure) {
         DelegationUtils.callWithDelegate(getConfigurator(obj), closure)
         obj
     }

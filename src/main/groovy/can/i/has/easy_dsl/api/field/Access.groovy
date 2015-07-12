@@ -9,5 +9,6 @@ import java.lang.annotation.Target
 @Target([ElementType.TYPE, ElementType.FIELD])
 @interface Access {
     boolean getter() default true;
+
     boolean setter() default true;
 }

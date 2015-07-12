@@ -38,7 +38,7 @@ import java.lang.reflect.Method
  * <pre>methodSetter = { args ->
  *     ...
  *     configuredObject.x = obtainerClosure.call(args)
- * }</pre>
+ *}</pre>
  * <br><br>
  *
  * There is another wrapper, appender, used with Collect and CollectScope: <b>appender</b>,
@@ -47,7 +47,7 @@ import java.lang.reflect.Method
  *     ...
  *     target = configuredObject."${currentTarget}"
  *     target,add(obtainerClosure.call(args))
- * }</pre>
+ *}</pre>
  * Target resolving is described in following paragraphs.
  *
  * <br><br>
@@ -55,13 +55,13 @@ import java.lang.reflect.Method
  * Last wrapper-like element is scope. It defines local target for appenders.
  * For example, with definition:
  * <pre>@MethodSetter
- * @CollectScope(elementName = "number", type = Integer)
+ * @CollectScope ( e l e m e n t N a m e = "number", type = Integer)
  * List<Integer> intList = []</pre>
  * we can use DSL:
  * <pre>intList {
  *     number 1
  *     number 2
- * }</pre>
+ *}</pre>
  * This will be handled as such:
  * <pre>number(...)</pre> will trigger proper appender, which will take argument and append it to current target.
  * <pre>intList(Closure)</pre> will start with saving current target for future usage. Then it will set it to "intList".
@@ -97,7 +97,7 @@ class MetaClassProvider {
     ConfigurationResolver resolver = ConfigurationResolver.instance
 
     @Memoized
-    MetaClass enhanceMetaClass(Configurator configurator){
+    MetaClass enhanceMetaClass(Configurator configurator) {
         MetaClass metaClass = configurator.metaClass
         enhanceWithFields(metaClass, configurator.traitThis.class)
         enhanceWithMethods(metaClass, configurator.traitThis.class)
@@ -105,14 +105,14 @@ class MetaClassProvider {
         return metaClass
     }
 
-    boolean isStandardMethod(Class clazz, Method method){
+    boolean isStandardMethod(Class clazz, Method method) {
         def classMethod = clazz.declaredMethods.find {
             it.name == method.name && it.parameterTypes == method.parameterTypes && it.returnType == method.returnType
         }
         def superClassMethod = clazz.superclass.declaredMethods.find {
             it.name == method.name && it.parameterTypes == method.parameterTypes && it.returnType == method.returnType
         }
-        return classMethod!=null && (method.isAnnotationPresent(Inherited) || superClassMethod==null)
+        return classMethod != null && (method.isAnnotationPresent(Inherited) || superClassMethod == null)
     }
 
     static final List<String> ignoredFields = [
@@ -129,7 +129,7 @@ class MetaClassProvider {
         "methodMissing"
     ]
 
-    boolean isStandardField(Class clazz, Field field){
+    boolean isStandardField(Class clazz, Field field) {
         if (ignoredFields.contains(field.name) || field.name.contains('$') || field.name.startsWith("_"))
             return false
         def classField = clazz.declaredFields.find {
@@ -138,11 +138,11 @@ class MetaClassProvider {
         def superClassField = clazz.superclass.declaredFields.find {
             it.name == field.name && it.type == field.type
         }
-        return classField!=null && (field.isAnnotationPresent(Inherited) || superClassField==null)
+        return classField != null && (field.isAnnotationPresent(Inherited) || superClassField == null)
     }
 
-    void enhanceWithMethods(MetaClass metaClass, Class clazz){
-        for (Method method: clazz.declaredMethods){
+    void enhanceWithMethods(MetaClass metaClass, Class clazz) {
+        for (Method method : clazz.declaredMethods) {
             if (isStandardMethod(clazz, method)) {
                 def methodAnnotations = resolver.getMethodAnnotations(method)
 
@@ -154,20 +154,20 @@ class MetaClassProvider {
         }
     }
 
-    void enhanceWithDelegate(MetaClass metaClass, Class clazz, Method method){
+    void enhanceWithDelegate(MetaClass metaClass, Class clazz, Method method) {
         if (resolver.getDelegate(method) || resolver.getDelegate(clazz)) {
             metaClass."${method.name}" << getDelegateClosure(method.name)
         }
     }
 
-    Closure getDelegateClosure(String name){
+    Closure getDelegateClosure(String name) {
         return { Object[] args ->
             traitThis.metaClass.invokeMethod(traitThis, name, args)
         }
     }
 
-    void enhanceWithFields(MetaClass metaClass, Class clazz){
-        for (Field field: clazz.declaredFields) {
+    void enhanceWithFields(MetaClass metaClass, Class clazz) {
+        for (Field field : clazz.declaredFields) {
             if (isStandardField(clazz, field)) {
                 def fieldAnnotations = resolver.getFieldAnnotations(field)
 
@@ -180,7 +180,7 @@ class MetaClassProvider {
         }
     }
 
-    void enhanceWithGetter(MetaClass metaClass, Class clazz, Field field){
+    void enhanceWithGetter(MetaClass metaClass, Class clazz, Field field) {
         def f = resolver.getGetter(field)
         def c = resolver.getGetter(clazz)
         if (f || c) {
@@ -188,20 +188,20 @@ class MetaClassProvider {
         }
     }
 
-    void enhanceWithSetter(MetaClass metaClass, Class clazz, Field field){
+    void enhanceWithSetter(MetaClass metaClass, Class clazz, Field field) {
         if (resolver.getSetter(field) || resolver.getSetter(clazz)) {
             metaClass."set${field.name.capitalize()}" << getSetterClosure(field.name)
         }
     }
 
-    void enhanceWithWithMethod(MetaClass metaClass, Class clazz, Field field){
+    void enhanceWithWithMethod(MetaClass metaClass, Class clazz, Field field) {
         WithMethod withMethod = resolver.getWithMethod(field) ?: resolver.getWithMethod(clazz)
         if (withMethod) {
-            def collectScope = field.annotations.find { it instanceof CollectScope}
+            def collectScope = field.annotations.find { it instanceof CollectScope }
             def collect = field.annotations.find { it instanceof Collect }
             assert collectScope == null || collect == null //todo: this can be solved
             def obtainerName = (collectScope ?: collect)?.elementName() ?: field.name
-            def scopeName = (collectScope ?: collect)==null ? null : field.name
+            def scopeName = (collectScope ?: collect) == null ? null : field.name
             def obtainedType = (collectScope ?: collect)?.type() ?: field.type
 
             Closure obtainer = (
@@ -215,14 +215,14 @@ class MetaClassProvider {
             }
 
             def newMethod = (collectScope ?: collect) ?
-                        getAppender(clazz, field, collect ? scopeName : null, obtainer) :
-                        getMethodSetter(field, obtainer)
+                getAppender(clazz, field, collect ? scopeName : null, obtainer) :
+                getMethodSetter(field, obtainer)
             metaClass."${obtainerName}" << newMethod
         }
 
     }
 
-    static void setTarget(Configurator configurator, List list){
+    static void setTarget(Configurator configurator, List list) {
         configurator.with {
             assert scopeStack
             def currentScope = scopeStack.last()
@@ -232,48 +232,48 @@ class MetaClassProvider {
 
     }
 
-    Closure getScopeClosure(Field field, String scopeName){
+    Closure getScopeClosure(Field field, String scopeName) {
         return { Closure c ->
             try {
-                ((Configurator)delegate).scopeStack.push(scopeName)
-                if (((Configurator)delegate).target == null)
-                    setTarget((Configurator)delegate, [])
-                DelegationUtils.callWithDelegate(((Configurator)delegate), c)
-                return ((Configurator)delegate).getTarget()
+                ((Configurator) delegate).scopeStack.push(scopeName)
+                if (((Configurator) delegate).target == null)
+                    setTarget((Configurator) delegate, [])
+                DelegationUtils.callWithDelegate(((Configurator) delegate), c)
+                return ((Configurator) delegate).getTarget()
             } finally {
-                ((Configurator)delegate).scopeStack.pop()
+                ((Configurator) delegate).scopeStack.pop()
             }
         }
     }
 
-    Closure getGetterClosure(String name){
+    Closure getGetterClosure(String name) {
         return { ->
             return traitThis.metaClass.invokeMethod(traitThis, "get${name.capitalize()}", new Object[0])
         }
     }
 
-    Closure getSetterClosure(String name){
+    Closure getSetterClosure(String name) {
         return { val ->
             return traitThis.metaClass.invokeMethod(traitThis, "set${name.capitalize()}", val)
         }
     }
 
-    Closure getClosureObtainer(String name){
+    Closure getClosureObtainer(String name) {
         return { Object... args ->
-            assert args.size()==1 && args[0] instanceof Closure
+            assert args.size() == 1 && args[0] instanceof Closure
             return args[0]
         }
     }
 
-    def preprocessArgs(Object... args){
-        assert args && args.size()<4
-        if (args.size()==1){
+    def preprocessArgs(Object... args) {
+        assert args && args.size() < 4
+        if (args.size() == 1) {
             switch (args[0]) {
                 case Closure: return [[:], null, args[0]]
                 case Map: return [args[0], null, {}]
-                default: return [[:], args[0], {} ]
+                default: return [[:], args[0], {}]
             }
-        } else if (args.size()==2){
+        } else if (args.size() == 2) {
             assert args[1] instanceof Closure
             if (args[0] instanceof Map)
                 return [args[0], null, args[1]]
@@ -292,7 +292,7 @@ class MetaClassProvider {
             Map kwargs = preprocessed[0]
             Object val = preprocessed[1]
             Closure closure = preprocessed[2]
-            def resultVal = MOPUtils.hasProperty(name) ? MOPUtils.getProperty(delegate.traitThis, name): null
+            def resultVal = MOPUtils.hasProperty(name) ? MOPUtils.getProperty(delegate.traitThis, name) : null
 
             if (withMethod.withSetter()) {
                 if (!withMethod.allowOverwrite() && resultVal)
@@ -303,7 +303,7 @@ class MetaClassProvider {
                     resultVal = constr.call(
                         type
                     )
-                } else  if (val)
+                } else if (val)
                     resultVal = val
             }
 
@@ -329,31 +329,31 @@ class MetaClassProvider {
     }
 
 
-    Closure getAppender(final Class clazz, Field field, final String staticScope, Closure obtainer){
+    Closure getAppender(final Class clazz, Field field, final String staticScope, Closure obtainer) {
         if (staticScope)
             ScopeRegistry.getScopeMapping(clazz)[staticScope] = field.name
         return { Object... args ->
             try {
                 if (staticScope) {
                     ((Configurator) delegate).scopeStack.push(staticScope)
-                    if (((Configurator)delegate).target == null)
-                        setTarget((Configurator)delegate, [])
+                    if (((Configurator) delegate).target == null)
+                        setTarget((Configurator) delegate, [])
                 }
                 def result = DelegationUtils.callWithDelegate(delegate, args, obtainer)
-                ((Configurator)delegate).target.add(result)
+                ((Configurator) delegate).target.add(result)
                 return result
             } finally {
                 if (staticScope)
-                    ((Configurator)delegate).scopeStack.pop()
+                    ((Configurator) delegate).scopeStack.pop()
             }
 
         }
     }
 
-    Closure getMethodSetter(Field field, Closure obtainer){
+    Closure getMethodSetter(Field field, Closure obtainer) {
         return { Object... args ->
             def result = DelegationUtils.callWithDelegate(delegate, args, obtainer)
-            ((Configurator)delegate).traitThis.metaClass.setProperty(((Configurator)delegate).traitThis, field.name, result)
+            ((Configurator) delegate).traitThis.metaClass.setProperty(((Configurator) delegate).traitThis, field.name, result)
             return result
         }
     }

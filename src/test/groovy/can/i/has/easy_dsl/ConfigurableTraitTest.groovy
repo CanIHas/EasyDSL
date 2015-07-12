@@ -38,7 +38,7 @@ class ConfigurableTraitTest extends GroovyTestCase {
                 return 10
             }
 
-            someMap a: 1, b: 2
+            someMap(a: 1, b: 2)
 
             text "A"
             text "B"

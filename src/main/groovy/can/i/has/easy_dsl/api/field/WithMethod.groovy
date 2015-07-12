@@ -11,8 +11,12 @@ import java.lang.annotation.Target
 @Target([ElementType.TYPE, ElementType.FIELD])
 @interface WithMethod {
     FieldConfigurationStrategy value() default FieldConfigurationStrategy.CONFIGURE;
+
     boolean withSetter() default true;
+
     boolean allowOverwrite() default true;
+
     boolean withMapping() default true;
+
     Class constructor() default DefaultConstructor
 }

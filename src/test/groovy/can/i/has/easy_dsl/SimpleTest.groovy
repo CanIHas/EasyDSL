@@ -21,8 +21,6 @@ class SimpleTest extends GroovyTestCase{
 
 
             intList {
-                gathered << target
-                gathered << delegate
                 number 1
                 gathered << number(2)
                 number 3
@@ -40,11 +38,6 @@ class SimpleTest extends GroovyTestCase{
         assert gathered[i++] == 1
         assert gathered[i++] == instance
         assert gathered[i++] ==  "y"
-        assert gathered[i++] == instance.intList
-        def configurator = gathered[i++]
-        assert configurator instanceof Configurator
-        assert configurator.traitThis.is(instance)
-        assert !configurator.scopeStack
         assert gathered[i++] == 2
         assert gathered[i++] == instance.intList
     }

@@ -1,7 +1,7 @@
 package can.i.has.easy_dsl.impl.utils
 
 
-class DefaultConstructor extends Closure{
+class DefaultConstructor extends Closure {
     DefaultConstructor(Object owner, Object thisObject) {
         super(owner, thisObject)
     }
@@ -10,8 +10,8 @@ class DefaultConstructor extends Closure{
         super(owner)
     }
 
-    def doCall(Class clazz){
-        switch (clazz){
+    def doCall(Class clazz) {
+        switch (clazz) {
             case Map: return [:]
             case List: return []
             case Set: return [].toSet()

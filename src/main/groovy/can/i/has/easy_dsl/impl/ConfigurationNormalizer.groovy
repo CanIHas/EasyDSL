@@ -8,11 +8,11 @@ import java.lang.annotation.Annotation
 
 class ConfigurationNormalizer {
 
-    static Annotation normalizeSetter(Setter setter){
+    static Annotation normalizeSetter(Setter setter) {
         return setter
     }
 
-    static Annotation normalizeSetter(Access access){
+    static Annotation normalizeSetter(Access access) {
         access.setter() ? new Setter() {
             @Override
             Class<? extends Annotation> annotationType() {
@@ -21,11 +21,11 @@ class ConfigurationNormalizer {
         } : null
     }
 
-    static Annotation normalizeGetter(Getter getter){
+    static Annotation normalizeGetter(Getter getter) {
         return getter
     }
 
-    static Annotation normalizeGetter(Access access){
+    static Annotation normalizeGetter(Access access) {
         access.getter() ? new Getter() {
             @Override
             Class<? extends Annotation> annotationType() {
@@ -34,7 +34,7 @@ class ConfigurationNormalizer {
         } : null
     }
 
-    protected static Annotation normalizeWithMethod(Annotation original){
+    protected static Annotation normalizeWithMethod(Annotation original) {
         new WithMethod() {
             @Override
             FieldConfigurationStrategy value() {
@@ -74,12 +74,12 @@ class ConfigurationNormalizer {
         }
     }
 
-    static List<Annotation> normalize(List<Annotation> annotations){
+    static List<Annotation> normalize(List<Annotation> annotations) {
         def out = []
         annotations.each {
-            if ([MethodSetter, Configure, Build].any { a -> a.isInstance(it)})
+            if ([MethodSetter, Configure, Build].any { a -> a.isInstance(it) })
                 out.add normalizeWithMethod(it)
-            else if (it instanceof Access){
+            else if (it instanceof Access) {
                 out.add normalizeGetter(it)
                 out.add normalizeSetter(it)
             } else

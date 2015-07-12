@@ -1,0 +1,43 @@
+plugins {
+    id 'java'
+    id 'groovy'
+    id 'idea'
+    id 'maven'
+    id 'application'
+}
+
+mainClassName = 'can.i.has.easy_dsl.SomeClass'
+
+group = "can.i.has"
+version = '0.2-SNAPSHOT'
+targetCompatibility = 1.7
+sourceCompatibility = 1.7
+
+
+task wrapper(type: Wrapper) {
+    gradleVersion = '2.4'
+}
+
+repositories {
+    mavenCentral()
+    jcenter()
+    maven { url 'http://dl.bintray.com/filipmalczak/maven' }
+}
+
+dependencies {
+    // Common dependencies
+    compile 'org.codehaus.groovy:groovy-all:2.4.3'//localGroovy()
+    compile 'org.codehaus.groovy:groovy-groovydoc:2.4.3'
+    compile 'org.slf4j:slf4j-api:1.7.2'
+    compile project(":ast")
+
+    testCompile 'junit:junit:4.11'
+
+
+    runtime 'org.slf4j:slf4j-log4j12:1.7.2'
+
+}
+
+test {
+    useJUnit()
+}
