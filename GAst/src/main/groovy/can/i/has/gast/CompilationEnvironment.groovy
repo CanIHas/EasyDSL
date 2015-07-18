@@ -22,37 +22,23 @@ final class CompilationEnvironment {
 
         TemporalClassLoader(SourceUnit su){
             super(su.classLoader, su.configuration)
-            println "su init $su"
             this.su = su
         }
 
         public Class loadClass(final String name, boolean lookupScriptFiles, boolean preferClassOverScript, boolean resolve)
             throws ClassNotFoundException, CompilationFailedException {
             def out = super.loadClass(name, lookupScriptFiles, preferClassOverScript, resolve)
-            println "su $su"
-            println "config ${su.configuration}"
-            println "dir ${su.configuration.targetDirectory}"
             if (this.su?.configuration?.targetDirectory) {
-                redundantClassFiles << new File(
+                new File(
                     this.su.configuration.targetDirectory,
                     name.replaceAll("[.]", "/")+".class"
-                )
-                redundantClassFiles << new File(
+                ).deleteOnExit()
+                new File(
                     this.su.configuration.targetDirectory,
                     name.replaceAll("[.]", "/")+'$_getClosure_closure1.class'
-                )
-//                f.deleteOnExit()
+                ).deleteOnExit()
             }
             return out
-        }
-    }
-
-    private static List<File> redundantClassFiles = [].asSynchronized()
-
-    static void deleteRedundantClasses(){
-        redundantClassFiles.each {
-            println it
-            it.delete()
         }
     }
 
@@ -109,20 +95,4 @@ final class CompilationEnvironment {
         cu.compile()
         return cu.classLoader.loadClass(name).newInstance().getClosure()
     }
-
-//    static void log(object){
-//        log "$object"
-//    }
-//
-//    static void log(String msg){
-//        System.out.println ">> ${this.class.name} :: $msg"
-//    }
-//
-//    static void warn(object){
-//        warn "$object"
-//    }
-//
-//    static void warn(String msg){
-//        System.err.println ">> ${this.class.name} :: $msg"
-//    }
 }

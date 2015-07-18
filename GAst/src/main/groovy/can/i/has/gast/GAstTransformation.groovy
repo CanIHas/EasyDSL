@@ -4,8 +4,8 @@ import can.i.has.gast.model.GAnnotation
 import can.i.has.gast.model.GClass
 import can.i.has.gast.model.GField
 import can.i.has.gast.model.GMethod
+import can.i.has.gast.utils.CompilationLogger
 
-import groovy.util.logging.Slf4j
 
 import static can.i.has.gast.CompilationEnvironment.*
 import org.codehaus.groovy.ast.ASTNode
@@ -17,8 +17,9 @@ import org.codehaus.groovy.transform.ASTTransformation
 
 import java.lang.annotation.Annotation
 
-@Slf4j
 abstract class GAstTransformation implements ASTTransformation{
+    static CompilationLogger log = new CompilationLogger(GAstTransformation)
+
     protected GAnnotation gAnnotation
     protected ASTNode annotated
 
@@ -85,9 +86,7 @@ abstract class GAstTransformation implements ASTTransformation{
     @Override
     void visit(ASTNode[] nodes, SourceUnit source) {
         try {
-            println "source $source"
             withSourceUnit(source) {
-                println "unit ${CompilationEnvironment.sourceUnit}"
                 if (!nodes) return
                 assert nodes.size() < 3
                 if (nodes.size() == 1) {
@@ -128,15 +127,13 @@ abstract class GAstTransformation implements ASTTransformation{
                             warnOfWrongType(annotated.class);
                             return
                     }
-                    gAnnotation = new GAnnotation(nodes[0], nodes[1])
+                    gAnnotation = new GAnnotation(nodes[0])
                 }
                 transform()
             }
         } catch (Exception e){
 //            e.printStackTrace()
             source.addException(e)
-        } finally {
-            CompilationEnvironment.deleteRedundantClasses()
         }
 
     }
