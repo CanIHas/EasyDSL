@@ -1,2 +1,2 @@
-include 'ast'
-include 'ast-test'
+include 'GAst-test'
+include 'GAst'
