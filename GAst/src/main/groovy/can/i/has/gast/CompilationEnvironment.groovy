@@ -50,12 +50,14 @@ final class CompilationEnvironment {
         this.sourceUnit.set(sourceUnit)
     }
 
-    static CompilationUnit newCompilationUnit(boolean store=true){
+    static CompilationUnit newCompilationUnit(boolean store=true, SourceUnit sourceUnit=null){
         def out = new CompilationUnit()
-        out.configuration = new CompilerConfiguration(getSourceUnit().configuration)
+        if (!sourceUnit)
+            sourceUnit = getSourceUnit()
+        out.configuration = new CompilerConfiguration(sourceUnit.configuration)
         out.classLoader = store ?
-            new GroovyClassLoader(getSourceUnit().classLoader, out.configuration) :
-            new TemporalClassLoader(getSourceUnit())
+            new GroovyClassLoader(sourceUnit.classLoader, out.configuration) :
+            new TemporalClassLoader(sourceUnit)
         return out
     }
 

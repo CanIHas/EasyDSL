@@ -23,24 +23,24 @@ abstract class GAstTransformation implements ASTTransformation{
     protected GAnnotation gAnnotation
     protected ASTNode annotated
 
-    @Lazy protected GClass gClass = new GClass(annotated)
-    @Lazy protected GMethod gMethod = new GMethod(annotated)
-    @Lazy protected GField gField = new GField(annotated)
+    @Lazy GClass $gClass = new GClass(annotated)
+    @Lazy GMethod $gMethod = new GMethod(annotated)
+    @Lazy GField $gField = new GField(annotated)
 
     GAnnotation getgAnnotation() {
         return gAnnotation
     }
 
     GClass getgClass() {
-        return gClass
+        return this.$gClass
     }
 
     GMethod getgMethod() {
-        return gMethod
+        return this.$gMethod
     }
 
     GField getgField() {
-        return gField
+        return this.$gField
     }
 
     boolean handleGlobal(){

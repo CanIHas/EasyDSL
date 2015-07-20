@@ -11,7 +11,13 @@ class ExampleTransform extends GAstTransformation{
 
     @Override
     void transform() {
-        log.info gAnnotation
-        log.info gAnnotation.members.closure.call()
+        gClass.addField("int i = ${gAnnotation.members.i}")
+        gClass.addMethod """String showYourPossibilities(String x){
+//    return "DUPA"
+    return ('${gAnnotation.members.str}'+x)*i
+}"""
+//    return ('${gAnnotation.members.str}'+x)*${gAnnotation.members.i}
+//        log.info gAnnotation
+//        log.info gAnnotation.members.closure.call()
     }
 }
