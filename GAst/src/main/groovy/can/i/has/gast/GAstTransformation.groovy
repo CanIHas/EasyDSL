@@ -132,7 +132,6 @@ abstract class GAstTransformation implements ASTTransformation{
                 transform()
             }
         } catch (Exception e){
-//            e.printStackTrace()
             source.addException(e)
         }
 

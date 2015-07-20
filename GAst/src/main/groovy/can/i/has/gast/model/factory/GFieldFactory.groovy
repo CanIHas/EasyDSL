@@ -28,11 +28,10 @@ class GFieldFactory {
     GField getGField(ClassNode classNode, String source){
         def classSource = """package ${classNode.packageName}
 
-class ${classNode.nameWithoutPackage}Whatever {
+class ${classNode.nameWithoutPackage}\$Field${source.hashCode()} {
 $source
 }
 """
-        //todo: will this work if method uses super?
         GClass gClass = GClass.compile(false, classSource)
         def out = gClass.node.fields.find {
             it.name == SourceUtils.getFieldName(source)

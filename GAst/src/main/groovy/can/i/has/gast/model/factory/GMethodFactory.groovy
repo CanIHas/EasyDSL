@@ -28,14 +28,14 @@ class GMethodFactory {
         assert sourceUnit //todo: exception
     }
 
-    GMethod getGMethod(GMethod c){
-        new GClass(new ClassNode(c))
+    GMethod getGMethod(MethodNode node){
+        new GMethod(node)
     }
 
     GMethod getGMethod(ClassNode classNode, String source){
         def classSource = """package ${classNode.packageName}
 
-class ${classNode.nameWithoutPackage}Whatever {
+class ${classNode.nameWithoutPackage}\$Method${source.hashCode()} {
 $source
 }
 """

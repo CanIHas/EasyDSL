@@ -30,7 +30,6 @@ class GClassFactory {
         def compilationUnit = CompilationEnvironment.newCompilationUnit(store, sourceUnit)
         def name = SourceUtils.getTypeName(source)
         def pkg = SourceUtils.getPackage(source)
-        def qualified = pkg ? "${pkg}.${name}" : name
         def nodes = new AstBuilder().buildFromString(source)
         def classNode = nodes.find { it instanceof ClassNode }
         if (store) {
@@ -38,7 +37,6 @@ class GClassFactory {
             compilationUnit.compile()
         }
         new GClass(classNode)
-//        getGClass(Class.forName(qualified))
     }
 
 

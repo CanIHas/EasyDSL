@@ -32,62 +32,8 @@ class GClass implements NodeView<ClassNode>{
         classNode.addField(GField.compile(this.node, source).node)
     }
 
+    //todo: get/setMethods(), -Fields()
     //todo: inner classes
-
-//    List<GMethod> getMethods(){
-//        new AbstractList<GMethod>() {
-//
-////            boolean add(String source) {
-////                add(GMethod.compile(packageName, className, source))
-////            }
-//
-//            @Override
-//            boolean add(GMethod element) {
-//                classNode.addMethod(element.methodNode)
-//            }
-//
-//            @Override
-//            GMethod remove(int index){
-//                classNode.removeMethod(get(index).node)
-//            }
-//
-//            @Override
-//            GMethod get(int index) {
-//                new GMethod(classNode.methods[index])
-//            }
-//
-//            @Override
-//            int size() {
-////                assert false && classNode
-////                log.info classNode
-//                classNode.methods.size()
-//            }
-//        }
-//    }
-//
-//    List<GField> getFields(){
-//        new AbstractList<GField>() {
-//            @Override
-//            boolean add(GField element) {
-//                classNode.addMethod(element.fieldNode)
-//            }
-//
-//            @Override
-//            GField remove(int index){
-//                classNode.removeMethod(get(index).node)
-//            }
-//
-//            @Override
-//            GField get(int index) {
-//                return null
-//            }
-//
-//            @Override
-//            int size() {
-//                return 0
-//            }
-//        }
-//    }
 
     ClassNode getNode(){
         classNode
