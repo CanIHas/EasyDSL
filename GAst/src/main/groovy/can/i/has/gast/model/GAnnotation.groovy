@@ -13,7 +13,13 @@ import java.lang.reflect.Method
 class GAnnotation implements NodeView<AnnotationNode>{
 
     AnnotationNode annotationNode
+    /**
+     * Class object for interface of viewed annotation.
+     */
     Class annotationClass
+    /**
+     * Annotation parameters
+     */
     Map<String, Object> members
 
     GAnnotation(AnnotationNode annotationNode) {

@@ -1,6 +1,7 @@
 package can.i.has.gast.model.factory
 
 import can.i.has.gast.CompilationEnvironment
+import can.i.has.gast.NamingService
 import can.i.has.gast.model.GClass
 import can.i.has.gast.model.GMethod
 import can.i.has.gast.utils.CompilationLogger
@@ -32,10 +33,11 @@ class GMethodFactory {
         new GMethod(node)
     }
 
+    //todo: javadoc
     GMethod getGMethod(ClassNode classNode, String source){
         def classSource = """package ${classNode.packageName}
 
-class ${classNode.nameWithoutPackage}\$Method${source.hashCode()} {
+class ${NamingService.getNewNumberedName(classNode.nameWithoutPackage, "method")} {
 $source
 }
 """

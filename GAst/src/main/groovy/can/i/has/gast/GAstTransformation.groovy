@@ -17,6 +17,14 @@ import org.codehaus.groovy.transform.ASTTransformation
 
 import java.lang.annotation.Annotation
 
+/**
+ * Abstract class to be extended by GAst-powered transformations.
+ *
+ * It provides standard boilerplate that returns from visit(). You can control what kind of elements (classes, methods,
+ * fields) are handled by this transformation, and whether it can work with global transformations.
+ * Also, it initializes gAnnotation, gClass, gMethod and gField fields providing views for annotation causing
+ * transformation (gAnnotation) and transformed node (rest, depending on node type).
+ */
 abstract class GAstTransformation implements ASTTransformation{
     static CompilationLogger log = new CompilationLogger(GAstTransformation)
 
@@ -43,6 +51,9 @@ abstract class GAstTransformation implements ASTTransformation{
         return this.$gField
     }
 
+    /**
+     * Can this class handle global transformations?
+     */
     boolean handleGlobal(){
         return false
     }
@@ -59,25 +70,33 @@ abstract class GAstTransformation implements ASTTransformation{
     }
 
     /**
+     * Default gAnnotation for global transformations, if needed.
      * @return null if global transformations are disabled, else - default gAnnotation
      */
     GAnnotation annotationForGlobal(){
         null
     }
 
+    /**
+     * Can this class handle transformation of class nodes?
+     */
     boolean handleClasses(){
         true
     }
 
+    /**
+     * Can this class handle transformation of method nodes?
+     */
     boolean handleMethods(){
         true
     }
 
+    /**
+     * Can this class handle transformation of field nodes?
+     */
     boolean handleFields(){
         true
     }
-
-
 
     private void warnOfWrongType(Class nodeClass){
         log.warn "Cannot handle $nodeClass. Only classes, methods and fields are supported."
@@ -137,6 +156,10 @@ abstract class GAstTransformation implements ASTTransformation{
 
     }
 
+    /**
+     * Body of your transformation.
+     * It will be executed with some sourceUnit in CompilationEnvironment and proper views initialized.
+     */
     abstract void transform()
 
 }

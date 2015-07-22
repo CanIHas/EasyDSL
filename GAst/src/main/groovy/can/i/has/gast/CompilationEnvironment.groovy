@@ -13,6 +13,9 @@ import org.codehaus.groovy.control.CompilationUnit
 import org.codehaus.groovy.control.CompilerConfiguration
 import org.codehaus.groovy.control.SourceUnit
 
+/**
+ * Class with static low-level procedures handling most basic compilation and compilation/source unit handling.
+ */
 final class CompilationEnvironment {
     private static ThreadLocal<SourceUnit> sourceUnit = new ThreadLocal<>()
 

@@ -1,6 +1,7 @@
 package can.i.has.gast.model.factory
 
 import can.i.has.gast.CompilationEnvironment
+import can.i.has.gast.NamingService
 import can.i.has.gast.model.GClass
 import can.i.has.gast.model.GField
 import can.i.has.gast.utils.SourceUtils
@@ -25,10 +26,11 @@ class GFieldFactory {
         new GField(fieldNode)
     }
 
+    //todo: javadoc
     GField getGField(ClassNode classNode, String source){
         def classSource = """package ${classNode.packageName}
 
-class ${classNode.nameWithoutPackage}\$Field${source.hashCode()} {
+class ${NamingService.getNewNumberedName(classNode.nameWithoutPackage, "field")} {
 $source
 }
 """

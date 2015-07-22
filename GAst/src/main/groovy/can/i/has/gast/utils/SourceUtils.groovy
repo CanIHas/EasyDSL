@@ -4,7 +4,8 @@ import java.util.regex.Pattern
 
 
 class SourceUtils {
-    static String word = /\w+/
+    //todo: this is really simplified
+    static String word = /(\w|\$)+/
     static String type = "$word([.]$word)*"
     static String name = word
     static String var = "($type$space)?$name"

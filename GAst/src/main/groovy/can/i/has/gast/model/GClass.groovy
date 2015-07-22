@@ -24,12 +24,60 @@ class GClass implements NodeView<ClassNode>{
         classNode.nameWithoutPackage
     }
 
-    void addMethod(String source) {
-        classNode.addMethod(GMethod.compile(this.node, source).node)
+    /**
+     * Compile and add new method.
+     * todo: add throws
+     * @param source source code of new method, containing annotations (optional), modifiers (optional), method name,
+     * parameters (optional) and body
+     * @return New GMethod object representing method that was just added
+     */
+    GMethod addMethod(String source) {
+        def method = GMethod.compile(this.node, source)
+        classNode.addMethod(method.node)
+        return method
     }
 
-    void addField(String source){
-        classNode.addField(GField.compile(this.node, source).node)
+    /**
+     * Get methods defined in this class, without those inherited
+     * @return list (possibly empty) of GMethods defined in this class
+     */
+    List<GMethod> getMethods(){
+        classNode.methods.collect { new GMethod(it) }
+    }
+
+    /**
+     * Get all methods of this class, with those inherited
+     * @return list of all GMethods of this class
+     */
+    List<GMethod> getAllMethods(){
+        classNode.allDeclaredMethods.collect { new GMethod(it) }
+    }
+
+    /**
+     * Get all abstract methods of this class
+     * @return list (possibly empty) of abtsract GMethods of this class
+     */
+    List<GMethod> getAbstractMethods(){
+        classNode.abstractMethods?.collect { new GMethod(it) } ?: []
+    }
+
+//    void setMethods(Iterable<GMethod> methods){
+//        methods.each { GMethod newMethod ->
+//            if (this.methods.contains(newMethod))
+//        }
+//    }
+
+    /**
+     * Compile and add new field.
+     * todo: add throws
+     * @param source source code of new field, containing annotations (optional), modifiers (optional), name, and initial
+     * value (optional)
+     * @return New GMethod object representing method that was just added
+     */
+    GField addField(String source){
+        def field = GField.compile(this.node, source)
+        classNode.addField(field.node)
+        return field
     }
 
     //todo: get/setMethods(), -Fields()
